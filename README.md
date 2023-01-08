@@ -1,4 +1,4 @@
-Year4Project
+Master's Thesis
 
 # Simulating the Stellar Galactic X-ray Emission of Cool Stars for Exoplanet Habitability
 
