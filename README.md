@@ -47,11 +47,11 @@ I am aiming to publish some new scripts to be able to calculate the X-ray emissi
 
 ## Authors and acknowledgment
 
-Farah Fauth Puigdomenech
-Cecilia Garraffo
-Jeremy Drake
-Kristina Monsch
-Vinay Kashyap
-Rafael Martinez Galarza
+>Farah Fauth Puigdomenech
+>Cecilia Garraffo
+>Jeremy Drake
+>Kristina Monsch
+>Vinay Kashyap
+>Rafael Martinez Galarza
 
 
