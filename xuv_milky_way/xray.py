@@ -76,42 +76,84 @@ def load_mist_tables(Mstar=1., filepath='/home/farah/Documents/Project/Data/MIST
 
         # return AGE_mist, TAU_mist, LBOL_mist, RADIUS_mist
         return AGE_mist, TAU_mist
+
+def age_MS(mass):
+    """
+    This function assigns the main squence age to each star depending on its mass.
+
+    mass: stellar mass in units of solar mass.
+    return: main sequence age value.
+    """
+    t_sol=10 #Main sequence lifetime of the Sun (in Gyrs)
+    m_sol=1 #Mass of Sun in solar masses
+    
+    if mass<=0.95:
+        
+        age_main_sequence=t_sol*(m_sol/mass**(2.5))
+        
+    if mass>0.95 and mass<=1:
+
+        age_main_sequence=9.5 # in Gyrs
+    
+    if mass>1 and mass<=1.05:
+
+        age_main_sequence=7 # in Gyrs
+        
+    if mass>1.05 and mass<=1.1:
+
+        age_main_sequence=5.5 # in Gyrs
+        
+    if mass>1.1 and mass<=1.15:
+
+        age_main_sequence=4.5 # in Gyrs
+        
+    if mass>1.15 and mass<=1.2:
+
+        age_main_sequence=4 # in Gyrs
+        
+    if mass>1.2 and mass<=1.25:
+
+        age_main_sequence=3.5 # in Gyrs    
+        
+    return age_main_sequence
+
     
 def open_all_mist_files():
     """
     This function opens all MIST tables and puts them in a main array for easy access and time efficiency.
 
-    return: main array for all MIST ages, main array for all MIST convective turnover times.
+    return: main array for all MIST ages, main array for all MIST convective turnover times, main array for all MIST bolometric luminosities.
     """
 
     #Open grid of the masses
     main_array_ages=[]
     main_array_tau=[]
+    main_array_lbol=[]
     
-    arrayname1a, arrayname1t = load_mist_tables(Mstar=MASSES[0])
-    arrayname2a, arrayname2t = load_mist_tables(Mstar=MASSES[1])
-    arrayname3a, arrayname3t = load_mist_tables(Mstar=MASSES[2])
-    arrayname4a, arrayname4t = load_mist_tables(Mstar=MASSES[3])
-    arrayname5a, arrayname5t = load_mist_tables(Mstar=MASSES[4])
-    arrayname6a, arrayname6t = load_mist_tables(Mstar=MASSES[5])
-    arrayname7a, arrayname7t = load_mist_tables(Mstar=MASSES[6])
-    arrayname8a, arrayname8t = load_mist_tables(Mstar=MASSES[7])
-    arrayname9a, arrayname9t = load_mist_tables(Mstar=MASSES[8])
-    arrayname10a, arrayname10t = load_mist_tables(Mstar=MASSES[9])
-    arrayname11a, arrayname11t = load_mist_tables(Mstar=MASSES[10])
-    arrayname12a, arrayname12t = load_mist_tables(Mstar=MASSES[11])
-    arrayname13a, arrayname13t = load_mist_tables(Mstar=MASSES[12])
-    arrayname14a, arrayname14t = load_mist_tables(Mstar=MASSES[13])
-    arrayname15a, arrayname15t = load_mist_tables(Mstar=MASSES[14])
-    arrayname16a, arrayname16t = load_mist_tables(Mstar=MASSES[15])
-    arrayname17a, arrayname17t = load_mist_tables(Mstar=MASSES[16])
-    arrayname18a, arrayname18t = load_mist_tables(Mstar=MASSES[17])
-    arrayname19a, arrayname19t = load_mist_tables(Mstar=MASSES[18])
-    arrayname20a, arrayname20t = load_mist_tables(Mstar=MASSES[19])
-    arrayname21a, arrayname21t = load_mist_tables(Mstar=MASSES[20])
-    arrayname22a, arrayname22t = load_mist_tables(Mstar=MASSES[21])
-    arrayname23a, arrayname23t = load_mist_tables(Mstar=MASSES[22])
-    arrayname24a, arrayname24t = load_mist_tables(Mstar=MASSES[23])
+    arrayname1a, arrayname1t, arrayname1l = load_mist_tables(Mstar=MASSES[0])
+    arrayname2a, arrayname2t, arrayname2l = load_mist_tables(Mstar=MASSES[1])
+    arrayname3a, arrayname3t, arrayname3l = load_mist_tables(Mstar=MASSES[2])
+    arrayname4a, arrayname4t, arrayname4l = load_mist_tables(Mstar=MASSES[3])
+    arrayname5a, arrayname5t, arrayname5l = load_mist_tables(Mstar=MASSES[4])
+    arrayname6a, arrayname6t, arrayname6l = load_mist_tables(Mstar=MASSES[5])
+    arrayname7a, arrayname7t, arrayname7l = load_mist_tables(Mstar=MASSES[6])
+    arrayname8a, arrayname8t, arrayname8l = load_mist_tables(Mstar=MASSES[7])
+    arrayname9a, arrayname9t, arrayname9l = load_mist_tables(Mstar=MASSES[8])
+    arrayname10a, arrayname10t, arrayname10l = load_mist_tables(Mstar=MASSES[9])
+    arrayname11a, arrayname11t, arrayname11l = load_mist_tables(Mstar=MASSES[10])
+    arrayname12a, arrayname12t, arrayname12l = load_mist_tables(Mstar=MASSES[11])
+    arrayname13a, arrayname13t, arrayname13l = load_mist_tables(Mstar=MASSES[12])
+    arrayname14a, arrayname14t, arrayname14l = load_mist_tables(Mstar=MASSES[13])
+    arrayname15a, arrayname15t, arrayname15l = load_mist_tables(Mstar=MASSES[14])
+    arrayname16a, arrayname16t, arrayname16l = load_mist_tables(Mstar=MASSES[15])
+    arrayname17a, arrayname17t, arrayname17l = load_mist_tables(Mstar=MASSES[16])
+    arrayname18a, arrayname18t, arrayname18l = load_mist_tables(Mstar=MASSES[17])
+    arrayname19a, arrayname19t, arrayname19l = load_mist_tables(Mstar=MASSES[18])
+    arrayname20a, arrayname20t, arrayname20l = load_mist_tables(Mstar=MASSES[19])
+    arrayname21a, arrayname21t, arrayname21l = load_mist_tables(Mstar=MASSES[20])
+    arrayname22a, arrayname22t, arrayname22l = load_mist_tables(Mstar=MASSES[21])
+    arrayname23a, arrayname23t, arrayname23l = load_mist_tables(Mstar=MASSES[22])
+    arrayname24a, arrayname24t, arrayname24l = load_mist_tables(Mstar=MASSES[23])
 
     
     main_array_ages.append(arrayname1a)
@@ -163,9 +205,34 @@ def open_all_mist_files():
     main_array_tau.append(arrayname22t)
     main_array_tau.append(arrayname23t)
     main_array_tau.append(arrayname24t)
+    
+    main_array_lbol.append(arrayname1l)
+    main_array_lbol.append(arrayname2l)
+    main_array_lbol.append(arrayname3l)
+    main_array_lbol.append(arrayname4l)
+    main_array_lbol.append(arrayname5l)
+    main_array_lbol.append(arrayname6l)
+    main_array_lbol.append(arrayname7l)
+    main_array_lbol.append(arrayname8l)
+    main_array_lbol.append(arrayname9l)
+    main_array_lbol.append(arrayname10l)
+    main_array_lbol.append(arrayname11l)
+    main_array_lbol.append(arrayname12l)
+    main_array_lbol.append(arrayname13l)
+    main_array_lbol.append(arrayname14l)
+    main_array_lbol.append(arrayname15l)
+    main_array_lbol.append(arrayname16l)
+    main_array_lbol.append(arrayname17l)
+    main_array_lbol.append(arrayname18l)
+    main_array_lbol.append(arrayname19l)
+    main_array_lbol.append(arrayname20l)
+    main_array_lbol.append(arrayname21l)
+    main_array_lbol.append(arrayname22l)
+    main_array_lbol.append(arrayname23l)
+    main_array_lbol.append(arrayname24l)
 
     
-    return main_array_ages, main_array_tau
+    return main_array_ages, main_array_tau, main_array_lbol
 
 
 def calculate_xray(RA_steps, DEC_steps, GUMS_file_path):
@@ -178,7 +245,7 @@ def calculate_xray(RA_steps, DEC_steps, GUMS_file_path):
     return: saves original csv file with an extra column for calculated Xray emissions.
     """
 
-    main_array_ages, main_array_tau = open_all_mist_files()
+    main_array_ages, main_array_tau, main_array_lbol = open_all_mist_files()
     
     Lx_Lbol_sat, Ro_sat, beta, C = constants()
     
@@ -209,9 +276,8 @@ def calculate_xray(RA_steps, DEC_steps, GUMS_file_path):
                     'BODY OF THE CODE'
     
                     #Create empty lists that we will use to create a new file with the calculated data
-                    # M=[]
-                    # AGE=[]
-                    PROT=[]
+                    # PROT=[]
+                    LX=[]
     
                     #Do this loop for each star in file
                     n_star=len(prot_data['ra']) #Number of stars in file we want to evaluate
@@ -220,61 +286,82 @@ def calculate_xray(RA_steps, DEC_steps, GUMS_file_path):
                         
                         #Mass of star
                         mass = prot_data.mass[i]
-                        
-                        if mass >= 0.4:
+
+                        #Age of star
+                        age = prot_data.uniform_ages[i] #Unit [Gyears]
+                    
+                        #Rotation period of star
+                        Prot = prot_data.Prot[i] #Units [days]
+
+                        # Calculate age MS of star                    
+                        age_main_sequence=age_MS(mass)
+                                        
+                        #If stars age is bigger than Main Sequence turn off then Lx is nan
+                        if age >= age_main_sequence:
                             
-                            nearest_mass = common.find_nearest(MASSES, mass)
-                            index_nearest_mass = int(np.where(MASSES==nearest_mass)[0])
+                            Lx = np.nan
+                            Prot = np.nan
                         
-                            #Load convection turnover time data for that mass
+                        #Else calculate Lx
+                        else: 
+                            
+                            #Find indexes for the mass documents with values nearest to the star's mass
+                            nearest_mass, nearest_mass2 = common.find_2_nearest(MASSES, mass)
+                            index_nearest_mass = int(np.where(MASSES==nearest_mass)[0])
+                            index_nearest_mass2 = int(np.where(MASSES==nearest_mass2)[0])
+                            
+                            #Load age data for that mass
                             AGE_mist = main_array_ages[index_nearest_mass]
-                            TAU_mist = main_array_tau[index_nearest_mass]
-                                
-                            #Age of star
-                            age = prot_data.age[i] #Unit [Myears]
+                                                
+                            #Find index for the age of the star in MIST table
                             nearest_age = common.find_nearest(AGE_mist, age)
                             index = int(np.where(AGE_mist.value == nearest_age)[0])
                             
-                            #Tau at specific age
-                            tau = TAU_mist[index].value #Units [days]
-                            
-                            
-                        else:
-                            
+                            #Calculate convective turnover time
                             tau = empirical_tau(mass)
+                            
+                            #Rossby number
+                            Ro = Prot/tau #Unitless
+                            
+                            #Load Lbol data from the two mass documents found before
+                            LBOL_mist = main_array_lbol[index_nearest_mass]
+                            LBOL_mist2 = main_array_lbol[index_nearest_mass2]
+                            
+                            #Get Lbol of star from the two mass documents at the age required
+                            Lbol1 = LBOL_mist[index] #Units of solar luminosity
+                            Lbol2 = LBOL_mist2[index] #Units of solar luminosity
+                            
+                            #Create a list with the two nearest masses and two calculated Lbols for that star
+                            two_masses=[nearest_mass,nearest_mass2]
+                            two_lbol=[Lbol1,Lbol2]
+                            
+                            #Calculate Lbol by interpolating between mass documents
+                            Lbol = common.interpolation(two_masses,two_lbol,mass)
+        
+                            #If Rossby number is smaller than the saturated Rossby number then we use the saturated Lx/Lbol value to calculate Lx              
+                            if Ro < Ro_sat:
+                                
+                                Lx_Lbol = Lx_Lbol_sat
+                                
+                                Lx = Lbol*Lx_Lbol # units of solar luminosity [L_\odot]
+                            
+                            #If Ro is bigger than Ro_sat then Lx/Lbol follows the relationship from Wright et al. 2011
+                            else:
+        
+                                Lx_Lbol = C*(Ro**beta)
+                                
+                                Lx = Lbol*Lx_Lbol # units of solar luminosity [L_\odot]
+                                                                                
+                        
+                LX.append(Lx)
+                        
+                if Lx_Lbol > Lx_Lbol_sat:
+                    print('yes')
+                        
     
-    
-                            
-                        #Rotation period of star
-                        Prot = prot_data.Prot[i] #Units [days]
-                        
-                        Ro = Prot/tau #Unitless
-                        
-                        Mbol = prot_data.mbol #Absolute bolometric magnitude data
-                        
-                        Lbol = 10**(0.4*(4.85-Mbol[i])) #Units of solar luminosity
-                                            
-                        if Ro < Ro_sat:
-                            
-                            Lx_Lbol = Lx_Lbol_sat
-                            
-                            Lx = Lbol*Lx_Lbol # units of solar luminosity [L_\odot]
-                            
-                        else:
-    
-                            Lx_Lbol = C*(Ro**beta)
-                            
-                            Lx = Lbol*Lx_Lbol # units of solar luminosity [L_\odot]
-                            
-                        LX.append(Lx)
-                        
-                        if Lx_Lbol > Lx_Lbol_sat:
-                            print('yes')
-                        
-    
-                    dictionary = {'Lx': LX}  
-                    dataframe = pd.DataFrame(dictionary) 
-                    prot_data['Lx'] = dataframe
-                    prot_data.to_csv(found, index=False)
+                dictionary = {'Lx': LX}  
+                dataframe = pd.DataFrame(dictionary) 
+                prot_data['Lx'] = dataframe
+                prot_data.to_csv(found, index=False)
                                     
-                    a+=1
+                a+=1
