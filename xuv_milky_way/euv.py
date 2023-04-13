@@ -23,24 +23,15 @@ sys.path.append( '/home/farah/Documents/Project/Data/MIST_tables/' ) #You can do
 #Create mass array with all the MIST masses we have
 MASSES = np.arange(0.1,2.05, 0.05)
 
-#Function to find nearest neighbour in an array
-def find_nearest(array, value):
-    """
-    Find nearest neighbour in an array given a value
-    array: Contains all values
-    value: Variable from which we want to find the nearest neighbour in the array
-    """
-    array = np.asarray(array)
-    idx = (np.abs(array - value)).argmin()
-    return idx, array[idx]
-
 
 #Function that loads all the MIST tables
 def load_mist_tables(Mstar=1., filepath='/home/farah/Documents/Project/Data/MIST_tables/'):
         """
-        Load in the MIST tables.
-        Mstar: Stellar masses in units of solar masses
-        filepath: Path where the MIST tables are stored
+        This function loads in the MIST tables.
+
+        Mstar: Stellar masses in units of solar masses.
+        filepath: Path where the MIST tables are stored (string).
+        return: arrays of the MIST tables that contain AGE, TAU (convective turnover time), LBOL, RADIUS (in that order).
         """
         import read_mist_models
         import astropy.units as u
@@ -76,7 +67,12 @@ def wood_spectra(IDL_file_path):
 
 
 def xray_wav_interval(wavelength):
-    
+    """
+    This function gives you the array indices for the wavelength interval of the Xray regime.
+
+    wavelength: array with wavelength values.
+    return: returns the index of the wavelength value of the start and end of the Xray regime in the given wavelength array.
+    """    
     # The y values
     # Fnd index of the wavelength array where value equals the start and end of the xray regime
     index1=int(np.where(wavelength==1)[0])
@@ -86,7 +82,13 @@ def xray_wav_interval(wavelength):
 
 
 def which_spectra(star_data_file_path, IDL_file_path):
+    """
+    This function finds the index of the spectrum that corresponds to a star and the Lx of the star.
 
+    star_data_file_path: file path of the star data (string).
+    IDL_file_path: file path of the IDL file containing the spectra data (string).
+    return: returns the index of the best fitting spectrum and the Lx value
+    """
     #Open csv file containing star data
     star_data = pd.read_csv(star_data_file_path) #Read csv file
     
@@ -107,14 +109,14 @@ def which_spectra(star_data_file_path, IDL_file_path):
             #Mass of star
             mass = star_data.mass[i]
             
-            nearest_mass = find_nearest(MASSES, mass)
+            nearest_mass = common.find_nearest(MASSES, mass)
             
             #Load convection turnover time data for that mass
             AGE_mist, TAU_mist, LBOL_mist, RADIUS_mist = load_mist_tables(Mstar=nearest_mass)
             
             #Age of star
             age = star_data.age[i] #Unit [Myears]
-            nearest_age = find_nearest(AGE_mist, age)
+            nearest_age = common.find_nearest(AGE_mist, age)
             index = int(np.where(AGE_mist.value == nearest_age)[0])
             
             #Radius of star
@@ -136,7 +138,7 @@ def which_spectra(star_data_file_path, IDL_file_path):
     
         log_Fx = np.log10(Fx)
         
-        idx, nearest_log_Fx = find_nearest(log_F,log_Fx)
+        idx, nearest_log_Fx = common.find_nearest(log_F,log_Fx)
         
         print(log_Fx, nearest_log_Fx)
         
@@ -146,7 +148,18 @@ def which_spectra(star_data_file_path, IDL_file_path):
         
 
 def norm_spectra(matrix, wavelength, idx, index1, index2, Lx):
-    
+    """
+    This function normalizes the spectrum of the star.
+
+    matrix: matrix from IDL file that contains data of all spectra depending on Fx.
+    wavelength: array with all wavelength values.
+    idx: index of best fitting spectrum.
+    index1: index for the start of Xray regime.
+    index2: index for end of Xray regime.
+    Lx: Xray luminosity of star.
+    return: returns Xray wavelength interval, the new points of the spectrum after normalization and the old points of the spectrum before normalization.
+    """
+
     # Compute the area using the composite Simpson's rule.
     y=matrix[idx][index1:index2+1]
     xray_w=wavelength[index1:index2+1]
@@ -162,7 +175,14 @@ def norm_spectra(matrix, wavelength, idx, index1, index2, Lx):
 
 
 def plot_spectra(xray_w, new_y, y):
-    
+    """
+    This function plots the original and normalized spectra.
+
+    xray_w: Xray wavelength interval.
+    new_y: the new points of the spectrum after normalization.
+    y: the old points of the spectrum before normalization.
+    return: plots.
+    """
     #Original EUV spectrum
     fig = plt.figure(figsize=(10, 7))
     plt.xlim([0.3,30])

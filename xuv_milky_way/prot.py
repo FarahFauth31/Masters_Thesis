@@ -8,36 +8,17 @@ import matplotlib.pyplot as plt
 from scipy import stats
 import time
 import os
+from xuv_milky_way import common
 
 'Calculate Prot of GUMS stars for all documents - More efficient'
-
-#Find nearest neighbour in array
-def find_nearest(array, value):
-    array = np.asarray(array)
-    idx = (np.abs(array - value)).argmin()
-    return array[idx]
-
-#Find nearest 2 neighbours in array
-def find_2_nearest(array, value):
-    array = np.asarray(array)
-    dif = np.abs(array - value)
-    sort = np.argsort(dif)
-    idx = sort[0] #Nearest neighbour
-    idx2 = sort[1] #2nd nearest neighbour
-    return array[idx], array[idx2]
-
-#Interpolation between two data points
-def interpolation(a, b, x):
-    output = b[0] + (x - a[0]) * ((b[1] - b[0])/(a[1] - a[0]))
-    return output
-
-# Function that finds a file and returns its path
-def find(name, path):
-    for root, dirs, files in os.walk(path):
-        if name in files:
-            return os.path.join(root, name)
         
 def kde(file_directory):
+    """
+    This function creates a 2D Gaussian kde distribution from cluster data.
+
+    file_directory: Path of the cluster data document.
+    return: Prot-Mass 2D Gaussian distribution.
+    """
     
     #Open csv file containing initial rotation period distribution data
     data = pd.read_csv(file_directory) #Read hPer csv file
@@ -57,7 +38,13 @@ def kde(file_directory):
     
         
 def initial_Prot(kde_ProtMass):
-            
+    """
+    This function resamples a initial rotation period value from a 2D Gaussian kde distribution.
+
+    kde_ProtMass: Prot-Mass 2D Gaussian distribution.
+    return: resampled rotation period value.
+    """ 
+
     #Resample data limiting mass and rotation period again        
     step=1 #One data point at a time
     c=0 #Count
@@ -74,6 +61,12 @@ def initial_Prot(kde_ProtMass):
     return re_Prot
 
 def open_mass_files():
+    """
+    This function opens all mass files from the Rotation Period Evolution Grid.
+
+    return: main array with all loaded mass documents.
+    """
+        
     #Open grid of the masses
     main_array=[]
     with open(f'/home/farah/Documents/Project/Data/Evolution_grid/0.1_evolution','rb') as af: arrayname1 = pickle.load(af)
@@ -131,7 +124,16 @@ def open_mass_files():
     
     
 def calculate_prot(Proti_file_directory, RA_steps, DEC_steps, GUMS_file_directory):
-    
+    """
+    This function calculates the rotation period of stars in document from basic stellar parameters.
+
+    Proti_file_directory: File directory of document containing young cluster data aimed for the resampling of initial rotation periods.
+    RA_steps: Steps of RA for file names.
+    DEC_steps: Steps of DEC for file names.
+    GUMS_file_directory: Path of file with GUMS data or stellar data.
+    return: saves original csv file with an extra column for calculated Prots.
+    """
+
     'INPUT'
     
     main_array=open_mass_files()
@@ -153,7 +155,7 @@ def calculate_prot(Proti_file_directory, RA_steps, DEC_steps, GUMS_file_director
             
             while a<500:
                             
-                found = find(f'RA_{k}_{k+4}_DEC_{b}_{b+4}_target.csv_Part{a}',GUMS_file_directory)
+                found = common.find(f'RA_{k}_{k+4}_DEC_{b}_{b+4}_target.csv_Part{a}',GUMS_file_directory)
                 
                 if found == None:
                     
@@ -183,13 +185,13 @@ def calculate_prot(Proti_file_directory, RA_steps, DEC_steps, GUMS_file_director
                         while s<1:
                         
                             Prot_i=initial_Prot(kde_ProtMass)[0] #Initial rotation period
-                            Grid_Prot_i1,Grid_Prot_i2=find_2_nearest(Initial_Prots, Prot_i) #Nearest initial rotation periods in grid
+                            Grid_Prot_i1,Grid_Prot_i2=common.find_2_nearest(Initial_Prots, Prot_i) #Nearest initial rotation periods in grid
                             index1=int(np.where(Initial_Prots==Grid_Prot_i1)[0]) #Index of 1st nearest initial rotation period
                             index2=int(np.where(Initial_Prots==Grid_Prot_i2)[0]) #Index of 2nd nearest initial rotation period
                             mass=mrdata.mass[i] #Mass in solar masses
                             age=mrdata.uniform_ages[i]*1000 #Age in Myrs
                                     
-                            Mass_1,Mass_2=find_2_nearest(MASSES, mass) #Find 2 nearest masses from MIST tables
+                            Mass_1,Mass_2=common.find_2_nearest(MASSES, mass) #Find 2 nearest masses from MIST tables
                             
                             main_index1=int(np.where(MASSES==Mass_1)[0]) #Index of 1st nearest initial rotation period
                             main_index2=int(np.where(MASSES==Mass_2)[0]) #Index of 2nd nearest initial rotation period
@@ -221,15 +223,15 @@ def calculate_prot(Proti_file_directory, RA_steps, DEC_steps, GUMS_file_director
                         diff_Prot2=[interp_Prot_2,interp_Prot_4] #For Mass_2
                         
                         #Calculate rotation period for each mass for Prot_i by interpolating between the two calculated rotation periods for the two nearest initial rotation periods in grid
-                        Med_Prot1 = interpolation(two_Prot_i, diff_Prot1, Prot_i)
-                        Med_Prot2 = interpolation(two_Prot_i, diff_Prot2, Prot_i)
+                        Med_Prot1 = common.interpolation(two_Prot_i, diff_Prot1, Prot_i)
+                        Med_Prot2 = common.interpolation(two_Prot_i, diff_Prot2, Prot_i)
                         
                         #Create lists with the two nearest masses and the calculated rotation periods
                         two_masses=[Mass_1,Mass_2]
                         two_periods=[Med_Prot1,Med_Prot2]
                         
                         #Calculate the final rotation period by interpolating between the two previous results
-                        Final_Prot = interpolation(two_masses, two_periods, mass)
+                        Final_Prot = common.interpolation(two_masses, two_periods, mass)
                                 
                         # AGE.append(age)
                         # M.append(mass)

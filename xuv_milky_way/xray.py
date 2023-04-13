@@ -19,8 +19,11 @@ sys.path.append( '/home/farah/Documents/Project/Data/MIST_tables/' ) #You can do
 
 
 def constants():
-    
-    # 'Find constant C'
+    """
+    This function calculates the constants needed for Xray calculations using the Wright 2011 coronal-Rossby relation.
+
+    return: saturated Lx_Lbol value, saturated Rossby value, beta (slope) and C (constant).
+    """
     
     # Wright et al. 2018 equation: (Lx/Lbol)sat = C*(R_{o,sat}^beta) --- C = (Lx/Lbol)sat / (R_{o,sat}^beta)
     
@@ -34,41 +37,29 @@ def constants():
 
 
 def empirical_tau(mass):
+    """
+    This function calculates the convective turnover time from an empirical prescription in Drake et al. (in prep).
+
+    mass: stellar mass.
+    return: calculated convective turnover time.
+    """
+    
     t = 10**((-1.101593022796932*mass) + 2.240877938410134)
     return t
 
 
-# 'Calculate Ro'
-
-# Ro = Prot/tau
-
 #Create mass array with all the MIST masses we have
 MASSES = np.arange(0.1,2.05, 0.05)
-
-#Function to find nearest neighbour in an array
-def find_nearest(array, value):
-    """
-    Find nearest neighbour in an array given a value
-    array: Contains all values
-    value: Variable from which we want to find the nearest neighbour in the array
-    """
-    array = np.asarray(array)
-    idx = (np.abs(array - value)).argmin()
-    return array[idx]
-
-# Function that finds a file and returns its path
-def find(name, path):
-    for root, dirs, files in os.walk(path):
-        if name in files:
-            return os.path.join(root, name)
 
 
 #Function that loads all the MIST tables
 def load_mist_tables(Mstar=1., filepath='/home/farah/Documents/Project/Data/MIST_tables/'):
         """
-        Load in the MIST tables.
-        Mstar: Stellar masses in units of solar masses
-        filepath: Path where the MIST tables are stored
+        This function loads in the MIST tables.
+
+        Mstar: Stellar masses in units of solar masses.
+        filepath: Path where the MIST tables are stored (string).
+        return: arrays of the MIST tables that contain AGE and TAU (convective turnover time).
         """
         import read_mist_models
         import astropy.units as u
@@ -86,6 +77,12 @@ def load_mist_tables(Mstar=1., filepath='/home/farah/Documents/Project/Data/MIST
         return AGE_mist, TAU_mist
     
 def open_all_mist_files():
+    """
+    This function opens all MIST tables and puts them in a main array for easy access and time efficiency.
+
+    return: main array for all MIST ages, main array for all MIST convective turnover times.
+    """
+
     #Open grid of the masses
     main_array_ages=[]
     main_array_tau=[]
@@ -171,6 +168,14 @@ def open_all_mist_files():
 
 
 def calculate_xray(RA_steps, DEC_steps, GUMS_file_path):
+    """
+    This function calculates the Xray emission of stars in document from basic stellar parameters.
+
+    RA_steps: Steps of RA for file names.
+    DEC_steps: Steps of DEC for file names.
+    GUMS_file_directory: Path of file with GUMS data or stellar data.
+    return: saves original csv file with an extra column for calculated Xray emissions.
+    """
 
     main_array_ages, main_array_tau = open_all_mist_files()
     
@@ -187,7 +192,7 @@ def calculate_xray(RA_steps, DEC_steps, GUMS_file_path):
             
             while a<500:
                             
-                found = find(f'RA_{k}_{k+4}_DEC_{b}_{b+4}_target.csv_Part{a}',GUMS_file_path)
+                found = common.find(f'RA_{k}_{k+4}_DEC_{b}_{b+4}_target.csv_Part{a}',GUMS_file_path)
                 
                 if found == None:
                     
@@ -217,7 +222,7 @@ def calculate_xray(RA_steps, DEC_steps, GUMS_file_path):
                         
                         if mass >= 0.4:
                             
-                            nearest_mass = find_nearest(MASSES, mass)
+                            nearest_mass = common.find_nearest(MASSES, mass)
                             index_nearest_mass = int(np.where(MASSES==nearest_mass)[0])
                         
                             #Load convection turnover time data for that mass
@@ -226,7 +231,7 @@ def calculate_xray(RA_steps, DEC_steps, GUMS_file_path):
                                 
                             #Age of star
                             age = prot_data.age[i] #Unit [Myears]
-                            nearest_age = find_nearest(AGE_mist, age)
+                            nearest_age = common.find_nearest(AGE_mist, age)
                             index = int(np.where(AGE_mist.value == nearest_age)[0])
                             
                             #Tau at specific age
