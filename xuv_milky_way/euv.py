@@ -14,6 +14,7 @@ from scipy.io.idl import readsav
 import sys
 from scipy.integrate import simpson
 from numpy import trapz
+from xuv_milky_way import common
 
 
 #/File/path/where/you/have/the/MIST_tables/
@@ -33,7 +34,7 @@ def load_mist_tables(Mstar=1., filepath='/home/farah/Documents/Project/Data/MIST
         filepath: Path where the MIST tables are stored (string).
         return: arrays of the MIST tables that contain AGE, TAU (convective turnover time), LBOL, RADIUS (in that order).
         """
-        import read_mist_models
+        from MIST_tables import read_mist_models
         import astropy.units as u
 
         print(filepath+'00{:03d}M.track.eep'.format(int(Mstar*100)))

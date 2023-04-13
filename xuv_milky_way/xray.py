@@ -13,6 +13,7 @@ from scipy.interpolate import InterpolatedUnivariateSpline
 from scipy import stats
 import time
 import os
+from xuv_milky_way import common
 
 #/File/path/where/you/have/the/MIST_tables/
 sys.path.append( '/home/farah/Documents/Project/Data/MIST_tables/' ) #You can download MIST tables from https://github.com/cgarraffo/Spin-down-model/tree/master/Mist_data
@@ -61,7 +62,7 @@ def load_mist_tables(Mstar=1., filepath='/home/farah/Documents/Project/Data/MIST
         filepath: Path where the MIST tables are stored (string).
         return: arrays of the MIST tables that contain AGE and TAU (convective turnover time).
         """
-        import read_mist_models
+        from MIST_tables import read_mist_models        
         import astropy.units as u
 
         # print(filepath+'00{:03d}M.track.eep'.format(int(Mstar*100)))
