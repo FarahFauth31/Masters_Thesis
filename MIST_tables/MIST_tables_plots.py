@@ -39,7 +39,7 @@ def load_mist_tables(Mstar=1., filepath='/home/farah/Documents/Project/Data/MIST
         return AGE_mist, TAU_mist, MOI_mist, MASS_mist, RADIUS_mist
 
 
-mass = np.arange(0.3,1.3,0.05) #0.05 steps
+mass = np.arange(0.1,1.3,0.05) #0.05 steps
 name_mass = [0.3,0.35,0.4,0.45,0.5,0.55,0.6,0.65,0.7,0.75,0.8,0.85,0.9,0.95,1,1.05,1.1,1.15, 1.2, 1.25] #exact masses
 
 n_steps=len(mass)
