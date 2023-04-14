@@ -1,7 +1,7 @@
 Master's Thesis
 
 # Simulating the Stellar Galactic X-ray Emission of Cool Stars for Exoplanet Habitability
-
+### *Note*: This README needs to be updated.
 *Note*: This is my Master's project. I have been working on it from the beginning of August. It's still an ongoing process. Here I present some of the scripts I have been creating over the past months.
 
 ## Abstract
