@@ -62,20 +62,20 @@ def load_mist_tables(Mstar=1., filepath='/home/farah/Documents/Project/Data/MIST
         filepath: Path where the MIST tables are stored (string).
         return: arrays of the MIST tables that contain AGE and TAU (convective turnover time).
         """
-        from MIST_tables import read_mist_models        
+        from MIST_tables import read_mist_models
         import astropy.units as u
 
         # print(filepath+'00{:03d}M.track.eep'.format(int(Mstar*100)))
 
         eep = read_mist_models.EEP(filepath+'00{:03d}M.track.eep'.format(int(Mstar*100)), verbose=False)
-        AGE_mist = (eep.eeps['star_age']*u.yr).to(u.Myr) # stellar age in Myears
+        AGE_mist = (eep.eeps['star_age']*u.yr).to(u.Gyr) # stellar age in Myears
         TAU_mist = (eep.eeps['conv_env_turnover_time_g']*u.s).to(u.d) # convective turnover time in days
-        # LBOL_mist = 10**(eep.eeps['log_L']) # Bolometric luminosity in units of solar luminosity
+        LBOL_mist = 10**(eep.eeps['log_L']) # Bolometric luminosity in units of solar luminosity
         # log_RADIUS_mist = eep.eeps['log_R']
         # RADIUS_mist = 10**log_RADIUS_mist
 
         # return AGE_mist, TAU_mist, LBOL_mist, RADIUS_mist
-        return AGE_mist, TAU_mist
+        return AGE_mist, TAU_mist, LBOL_mist
 
 def age_MS(mass):
     """
@@ -237,7 +237,7 @@ def open_all_mist_files():
 
 def calculate_xray(RA_steps, DEC_steps, GUMS_file_path):
     """
-    This function calculates the Xray emission of stars in document from basic stellar parameters.
+    This function calculates the Xray emission of stars in document from basic stellar parameters using an empirical description of the convective turnover time and the bolometric luminosity from MIST tables.
 
     RA_steps: Steps of RA for file names.
     DEC_steps: Steps of DEC for file names.
@@ -255,50 +255,54 @@ def calculate_xray(RA_steps, DEC_steps, GUMS_file_path):
     for k in RA_steps:
                             
         for b in DEC_steps:
-    
+
             a=1
             
+            # Loop that looks into the parts of files in each section of sky
             while a<500:
-                            
-                found = common.find(f'RA_{k}_{k+4}_DEC_{b}_{b+4}_target.csv_Part{a}',GUMS_file_path)
                 
+                # Trying to find the file
+                found = common.find(f'RA_{k}_{k+4}_DEC_{b}_{b+4}_target.csv_Part{a}',GUMS_file_path)
+
+                # If the file is not found the loop looks into next section of sky
                 if found == None:
                     
                     a=500
                 
+                # If file is found we calculate the Xray emission of stars for each document
                 else:
-                    
+                                                    
                     print(f'RA_{k}_{k+4}_DEC_{b}_{b+4}_target.csv_Part{a}')
                     
                     #Open csv file containing star data
                     prot_data = pd.read_csv(found) #Read csv file
-    
+                    
                     'BODY OF THE CODE'
-    
-                    #Create empty lists that we will use to create a new file with the calculated data
+
+                    #Create empty lists that we will use to create a new column
                     # PROT=[]
                     LX=[]
+
+                    n_star=len(prot_data['ra']) #Number of stars in file we want to evaluate
     
                     #Do this loop for each star in file
-                    n_star=len(prot_data['ra']) #Number of stars in file we want to evaluate
-                    
                     for i in range(n_star):
                         
                         #Mass of star
                         mass = prot_data.mass[i]
-
+                        
                         #Age of star
                         age = prot_data.uniform_ages[i] #Unit [Gyears]
-                    
+                        
                         #Rotation period of star
                         Prot = prot_data.Prot[i] #Units [days]
 
                         # Calculate age MS of star                    
                         age_main_sequence=age_MS(mass)
-                                        
+                                            
                         #If stars age is bigger than Main Sequence turn off then Lx is nan
                         if age >= age_main_sequence:
-                            
+                                
                             Lx = np.nan
                             Prot = np.nan
                         
@@ -351,17 +355,22 @@ def calculate_xray(RA_steps, DEC_steps, GUMS_file_path):
                                 Lx_Lbol = C*(Ro**beta)
                                 
                                 Lx = Lbol*Lx_Lbol # units of solar luminosity [L_\odot]
-                                                                                
+                                                                                    
+                            
+                        LX.append(Lx)
+                        # PROT.append(Prot)
+                        # LXLBOL.append(Lx_Lbol)
+                        # RO.append(Ro)
+                        # TAU.append(tau)
                         
-                LX.append(Lx)
+                        if Lx_Lbol > Lx_Lbol_sat:
+                            print('yes')
                         
-                if Lx_Lbol > Lx_Lbol_sat:
-                    print('yes')
-                        
-    
-                dictionary = {'Lx': LX}  
-                dataframe = pd.DataFrame(dictionary) 
-                prot_data['Lx'] = dataframe
-                prot_data.to_csv(found, index=False)
+
+                    #dictionary = {'Lx': LX} 
+                    #dataframe = pd.DataFrame(dictionary)
+                    #prot_data['Lx'] = dataframe
+                    #prot_data.to_csv(found, index=False)
+                    print(LX)
                                     
-                a+=1
+                    a+=1

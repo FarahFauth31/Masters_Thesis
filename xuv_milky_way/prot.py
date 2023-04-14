@@ -132,6 +132,8 @@ def calculate_prot(Proti_file_directory, RA_steps, DEC_steps, GUMS_file_director
     DEC_steps: Steps of DEC for file names.
     GUMS_file_directory: Path of file with GUMS data or stellar data.
     return: saves original csv file with an extra column for calculated Prots.
+
+    Note: So that the code finds each file depending on RA and DEC, the files have been named as follows -> RA_{k}_{k+4}_DEC_{b}_{b+4}.csv_Part{a}
     """
 
     'INPUT'

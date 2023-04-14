@@ -14,6 +14,7 @@ from scipy.io.idl import readsav
 import sys
 from scipy.integrate import simpson
 from numpy import trapz
+import astropy.units as u
 from xuv_milky_way import common
 
 
@@ -82,7 +83,7 @@ def xray_wav_interval(wavelength):
     return index1, index2
 
 
-def which_spectra(star_data_file_path, IDL_file_path):
+def which_spectra(star_data_file_path, IDL_file_path, n_star):
     """
     This function finds the index of the spectrum that corresponds to a star and the Lx of the star.
 
@@ -100,8 +101,6 @@ def which_spectra(star_data_file_path, IDL_file_path):
     index1, index2 = xray_wav_interval(wavelength)
     
     # print(index1, index2, wavelength[index1], wavelength[index2], wavelength[index1:index2+1])
-    
-    n_star=3
     
     for i in range(n_star):
         
@@ -139,13 +138,14 @@ def which_spectra(star_data_file_path, IDL_file_path):
     
         log_Fx = np.log10(Fx)
         
-        idx, nearest_log_Fx = common.find_nearest(log_F,log_Fx)
+        nearest_log_Fx = common.find_nearest(log_F,log_Fx)
+        idx = int(np.where(log_F==nearest_log_Fx)[0])
         
         print(log_Fx, nearest_log_Fx)
         
         spectrum = matrix[idx]
         
-    return idx, Lx
+    return matrix, wavelength, idx, index1, index2, Lx
         
 
 def norm_spectra(matrix, wavelength, idx, index1, index2, Lx):
