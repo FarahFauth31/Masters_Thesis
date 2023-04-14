@@ -1,4 +1,4 @@
-## Read me
+## Evolution grid directory
 
 This directory contains the files of the Evolution Grid created with the Garraffo et al. 2018 model.
 Each document corresponds to a mass from the MIST tables.
