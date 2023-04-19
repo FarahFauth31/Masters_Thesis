@@ -9,3 +9,6 @@ prot.py contains functions to treat stellar data and calculate the rotation peri
 xray.py contains functions to calculate the Xray emission of stars from rotation period, convective turnover time and bolometric luminosity.
 
 euv.py contains functions to calculate the EUV emissions of stars and assign to each star a spectra depending on its Xray surface flux.
+
+Examples.ipynb gives an example of how to use all the python functions of the python scripts described above to calculate Prot, Xray and EUV from basic stellar parameters found in a .csv file.
+            
