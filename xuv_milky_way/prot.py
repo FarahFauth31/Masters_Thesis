@@ -87,7 +87,7 @@ def open_mass_files():
     with open(f'/home/farah/Documents/Project/Data/Evolution_grid/0.85_evolution','rb') as au: arrayname16 = pickle.load(au)
     with open(f'/home/farah/Documents/Project/Data/Evolution_grid/0.9_evolution','rb') as av: arrayname17 = pickle.load(av)
     with open(f'/home/farah/Documents/Project/Data/Evolution_grid/0.95_evolution','rb') as aw: arrayname18 = pickle.load(aw)
-    with open(f'/home/farah/Documents/Project/Data/Evolution_grid/1.0_evolution','rb') as ax: arrayname19 = pickle.load(ax)
+    with open(f'/home/farah/Documents/Project/Data/Evolution_grid/1_evolution','rb') as ax: arrayname19 = pickle.load(ax)
     with open(f'/home/farah/Documents/Project/Data/Evolution_grid/1.05_evolution','rb') as ay: arrayname20 = pickle.load(ay)
     with open(f'/home/farah/Documents/Project/Data/Evolution_grid/1.1_evolution','rb') as az: arrayname21 = pickle.load(az)
     with open(f'/home/farah/Documents/Project/Data/Evolution_grid/1.15_evolution','rb') as aa: arrayname22 = pickle.load(aa)
