@@ -35,6 +35,7 @@ def load_mist_tables(Mstar=1., filepath='/home/farah/Documents/Project/Data/MIST
         filepath: Path where the MIST tables are stored (string).
         return: arrays of the MIST tables that contain AGE, TAU (convective turnover time), LBOL, RADIUS (in that order).
         """
+        
         from MIST_tables import read_mist_models
         import astropy.units as u
 
@@ -51,6 +52,12 @@ def load_mist_tables(Mstar=1., filepath='/home/farah/Documents/Project/Data/MIST
 
 
 def wood_spectra(IDL_file_path):
+    """
+    This function uploads all the information contained in the IDL file.
+
+    IDL_file_path: file path of IDL file.
+    return: returns the arrays containing data for wavelength (array[1100]), wavelength vs log surface flux matrix (array[1100, 36]) and vector of logarithmic surface fluxes (array[36]).
+    """ 
     
     # Equation used F = L/(4*pi*R^2) --- Fx/Lx = Fbol/Lbol --- Fx = Lx * (Fbol/Lbol)
     
@@ -61,11 +68,10 @@ def wood_spectra(IDL_file_path):
     
     #Data from IDL file
     wavelength = s['sp_wvl'] #Wavelength, Array[1100]
-    woodemsi = s['woodemsi'] #Array[81, 36]
     matrix = s['woodspec'] #[wavelength,log surface flux] matrix, Array[1100, 36]
     log_F = s['wfxi'] #Vector of logarithmic surface fluxes, Array[36]
     
-    return wavelength, woodemsi, matrix, log_F
+    return wavelength, matrix, log_F
 
 
 def xray_wav_interval(wavelength):
@@ -75,6 +81,7 @@ def xray_wav_interval(wavelength):
     wavelength: array with wavelength values.
     return: returns the index of the wavelength value of the start and end of the Xray regime in the given wavelength array.
     """    
+
     # The y values
     # Fnd index of the wavelength array where value equals the start and end of the xray regime
     index1=int(np.where(wavelength==1)[0])
@@ -83,22 +90,27 @@ def xray_wav_interval(wavelength):
     return index1, index2
 
 
-def which_spectra(star_data_file_path, IDL_file_path, n_star):
+def which_spectra(GUMS_file_path, IDL_file_path, n_star):
     """
     This function finds the index of the spectrum that corresponds to a star and the Lx of the star.
 
-    star_data_file_path: file path of the star data (string).
+    GUMS_file_path: file path of the star data (string).
     IDL_file_path: file path of the IDL file containing the spectra data (string).
+    n_star: number of stars in the document from which you want to calculate the Lx and spectrum.
     return: returns the index of the best fitting spectrum and the Lx value
     """
+
     #Open csv file containing star data
-    star_data = pd.read_csv(star_data_file_path) #Read csv file
+    star_data = pd.read_csv(GUMS_file_path) #Read csv file
     
     R_star = star_data.radius #Absolute bolometric magnitude data
     
-    wavelength, woodemsi, matrix, log_F = wood_spectra(IDL_file_path)
+    wavelength, matrix, log_F = wood_spectra(IDL_file_path)
     
     index1, index2 = xray_wav_interval(wavelength)
+
+    IDX=[]
+    LX=[]
     
     # print(index1, index2, wavelength[index1], wavelength[index2], wavelength[index1:index2+1])
     
@@ -140,72 +152,81 @@ def which_spectra(star_data_file_path, IDL_file_path, n_star):
         
         nearest_log_Fx = common.find_nearest(log_F,log_Fx)
         idx = int(np.where(log_F==nearest_log_Fx)[0])
-        
-        print(log_Fx, nearest_log_Fx)
-        
-        spectrum = matrix[idx]
-        
-    return matrix, wavelength, idx, index1, index2, Lx
+
+        IDX.append(idx)
+        LX.append(Lx)    
+    
+    return matrix, wavelength, IDX, index1, index2, LX
         
 
-def norm_spectra(matrix, wavelength, idx, index1, index2, Lx):
+def norm_spectra(matrix, wavelength, IDX, index1, index2, LX, n_star):
     """
     This function normalizes the spectrum of the star.
 
     matrix: matrix from IDL file that contains data of all spectra depending on Fx.
     wavelength: array with all wavelength values.
-    idx: index of best fitting spectrum.
+    IDX: array with index of best fitting spectrum.
     index1: index for the start of Xray regime.
     index2: index for end of Xray regime.
-    Lx: Xray luminosity of star.
+    LX: array with Xray luminosity of stars.
+    n_star: number of stars in the document from which you want to calculate the normalized spectrum.
     return: returns Xray wavelength interval, the new points of the spectrum after normalization and the old points of the spectrum before normalization.
     """
 
-    # Compute the area using the composite Simpson's rule.
-    y=matrix[idx][index1:index2+1]
-    xray_w=wavelength[index1:index2+1]
-    area = simpson(y, dx=0.05)
-    print("area =", area)
+    Y=[]
+    NEW_Y=[]
 
-    d=Lx/area
-    print(Lx)
+    for i in range(n_star):
 
-    new_y=y*d
+        # Compute the area using the composite Simpson's rule.
+        y=matrix[IDX[i]][index1:index2+1]
+        xray_w=wavelength[index1:index2+1]
+        area = simpson(y, dx=0.05)
+
+        d=LX[i]/area
+
+        new_y=y*d
+
+        Y.append(y)
+        NEW_Y.append(new_y)
     
-    return xray_w, new_y, y
+    return xray_w, NEW_Y, Y
 
 
-def plot_spectra(xray_w, new_y, y):
+def plot_spectra(xray_w, NEW_Y, Y, n_star):
     """
     This function plots the original and normalized spectra.
 
     xray_w: Xray wavelength interval.
-    new_y: the new points of the spectrum after normalization.
-    y: the old points of the spectrum before normalization.
+    NEW_Y: array with the new points of the spectrum after normalization of each star.
+    Y: array with the old points of the spectrum before normalization of each star.
+    n_star: number of stars in the document from which you want to plot the original and normalized spectra.
     return: plots.
     """
-    #Original EUV spectrum
-    fig = plt.figure(figsize=(10, 7))
-    plt.xlim([0.3,30])
-    plt.xlabel('Wavelength [$\AA$]', fontsize=15)
-    plt.ylabel('$L_{x,\u03BB}$ [erg $s^{-1}$]', fontsize=15)
-    plt.title('Original EUV Spectra', fontsize= 20)
-    plt.plot(xray_w,y)
-    ax = plt.gca()
-    plt.tick_params(labelsize=14)
-    plt.tick_params(labelsize=14)
-    plt.tick_params(labelsize=14)
-    plt.tick_params(axis='y', which='both')
 
-    #Normalized EUV spectrum
-    fig = plt.figure(figsize=(10, 7))
-    plt.xlim([0.3,30])
-    plt.xlabel('Wavelength [$\AA$]', fontsize=15)
-    plt.ylabel('$L_{x,\u03BB}$ [erg $s^{-1}$]', fontsize=15)
-    plt.title('Normalized EUV Spectra', fontsize= 20)
-    plt.plot(xray_w,new_y)
-    ax = plt.gca()
-    plt.tick_params(labelsize=14)
-    plt.tick_params(labelsize=14)
-    plt.tick_params(labelsize=14)
-    plt.tick_params(axis='y', which='both')
+    for i in range(n_star):
+        #Original EUV spectrum
+        fig = plt.figure(figsize=(10, 7))
+        plt.xlim([0.3,30])
+        plt.xlabel('Wavelength [$\AA$]', fontsize=15)
+        plt.ylabel('$L_{x,\u03BB}$ [erg $s^{-1}$]', fontsize=15)
+        plt.title(f'Original EUV Spectra - Star {i}', fontsize= 20)
+        plt.plot(xray_w,Y[i])
+        ax = plt.gca()
+        plt.tick_params(labelsize=14)
+        plt.tick_params(labelsize=14)
+        plt.tick_params(labelsize=14)
+        plt.tick_params(axis='y', which='both')
+
+        #Normalized EUV spectrum
+        fig = plt.figure(figsize=(10, 7))
+        plt.xlim([0.3,30])
+        plt.xlabel('Wavelength [$\AA$]', fontsize=15)
+        plt.ylabel('$L_{x,\u03BB}$ [erg $s^{-1}$]', fontsize=15)
+        plt.title(f'Normalized EUV Spectra - Star {i}', fontsize= 20)
+        plt.plot(xray_w,NEW_Y[i])
+        ax = plt.gca()
+        plt.tick_params(labelsize=14)
+        plt.tick_params(labelsize=14)
+        plt.tick_params(labelsize=14)
+        plt.tick_params(axis='y', which='both')

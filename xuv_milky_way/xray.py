@@ -235,12 +235,10 @@ def open_all_mist_files():
     return main_array_ages, main_array_tau, main_array_lbol
 
 
-def calculate_xray(RA_steps, DEC_steps, GUMS_file_path):
+def calculate_xray(GUMS_file_path):
     """
     This function calculates the Xray emission of stars in document from basic stellar parameters using an empirical description of the convective turnover time and the bolometric luminosity from MIST tables.
 
-    RA_steps: Steps of RA for file names.
-    DEC_steps: Steps of DEC for file names.
     GUMS_file_directory: Path of file with GUMS data or stellar data.
     return: saves original csv file with an extra column for calculated Xray emissions.
     """
@@ -248,129 +246,98 @@ def calculate_xray(RA_steps, DEC_steps, GUMS_file_path):
     main_array_ages, main_array_tau, main_array_lbol = open_all_mist_files()
     
     Lx_Lbol_sat, Ro_sat, beta, C = constants()
-    
+                         
+    #Open csv file containing star data
+    prot_data = pd.read_csv(GUMS_file_path) #Read csv file
+                    
+    'BODY OF THE CODE'
+
+    #Create empty lists that we will use to create a new column
     LX=[]
+
+    n_star=len(prot_data['ra']) #Number of stars in file we want to evaluate
     
-    # Loop that looks into each file
-    for k in RA_steps:
-                            
-        for b in DEC_steps:
-
-            a=1
-            
-            # Loop that looks into the parts of files in each section of sky
-            while a<500:
-                
-                # Trying to find the file
-                found = common.find(f'RA_{k}_{k+4}_DEC_{b}_{b+4}_target.csv_Part{a}',GUMS_file_path)
-
-                # If the file is not found the loop looks into next section of sky
-                if found == None:
-                    
-                    a=500
-                
-                # If file is found we calculate the Xray emission of stars for each document
-                else:
-                                                    
-                    print(f'RA_{k}_{k+4}_DEC_{b}_{b+4}_target.csv_Part{a}')
-                    
-                    #Open csv file containing star data
-                    prot_data = pd.read_csv(found) #Read csv file
-                    
-                    'BODY OF THE CODE'
-
-                    #Create empty lists that we will use to create a new column
-                    # PROT=[]
-                    LX=[]
-
-                    n_star=len(prot_data['ra']) #Number of stars in file we want to evaluate
-    
-                    #Do this loop for each star in file
-                    for i in range(n_star):
+    #Do this loop for each star in file
+    for i in range(n_star):
                         
-                        #Mass of star
-                        mass = prot_data.mass[i]
+        #Mass of star
+        mass = prot_data.mass[i]
                         
-                        #Age of star
-                        age = prot_data.uniform_ages[i] #Unit [Gyears]
+        #Age of star
+        age = prot_data.uniform_ages[i] #Unit [Gyears]
                         
-                        #Rotation period of star
-                        Prot = prot_data.Prot[i] #Units [days]
+        #Rotation period of star
+        Prot = prot_data.Prot[i] #Units [days]
 
-                        # Calculate age MS of star                    
-                        age_main_sequence=age_MS(mass)
+        # Calculate age MS of star                    
+        age_main_sequence=age_MS(mass)
                                             
-                        #If stars age is bigger than Main Sequence turn off then Lx is nan
-                        if age >= age_main_sequence:
+        #If stars age is bigger than Main Sequence turn off then Lx is nan
+        if age >= age_main_sequence:
                                 
-                            Lx = np.nan
-                            Prot = np.nan
+            Lx = np.nan
+            Prot = np.nan
                         
-                        #Else calculate Lx
-                        else: 
+        #Else calculate Lx
+        else: 
                             
-                            #Find indexes for the mass documents with values nearest to the star's mass
-                            nearest_mass, nearest_mass2 = common.find_2_nearest(MASSES, mass)
-                            index_nearest_mass = int(np.where(MASSES==nearest_mass)[0])
-                            index_nearest_mass2 = int(np.where(MASSES==nearest_mass2)[0])
+            #Find indexes for the mass documents with values nearest to the star's mass
+            nearest_mass, nearest_mass2 = common.find_2_nearest(MASSES, mass)
+            index_nearest_mass = int(np.where(MASSES==nearest_mass)[0])
+            index_nearest_mass2 = int(np.where(MASSES==nearest_mass2)[0])
                             
-                            #Load age data for that mass
-                            AGE_mist = main_array_ages[index_nearest_mass]
+            #Load age data for that mass
+            AGE_mist = main_array_ages[index_nearest_mass]
                                                 
-                            #Find index for the age of the star in MIST table
-                            nearest_age = common.find_nearest(AGE_mist, age)
-                            index = int(np.where(AGE_mist.value == nearest_age)[0])
+            #Find index for the age of the star in MIST table
+            nearest_age = common.find_nearest(AGE_mist, age)
+            index = int(np.where(AGE_mist.value == nearest_age)[0])
                             
-                            #Calculate convective turnover time
-                            tau = empirical_tau(mass)
+            #Calculate convective turnover time
+            tau = empirical_tau(mass)
                             
-                            #Rossby number
-                            Ro = Prot/tau #Unitless
+            #Rossby number
+            Ro = Prot/tau #Unitless
                             
-                            #Load Lbol data from the two mass documents found before
-                            LBOL_mist = main_array_lbol[index_nearest_mass]
-                            LBOL_mist2 = main_array_lbol[index_nearest_mass2]
+            #Load Lbol data from the two mass documents found before
+            LBOL_mist = main_array_lbol[index_nearest_mass]
+            LBOL_mist2 = main_array_lbol[index_nearest_mass2]
                             
-                            #Get Lbol of star from the two mass documents at the age required
-                            Lbol1 = LBOL_mist[index] #Units of solar luminosity
-                            Lbol2 = LBOL_mist2[index] #Units of solar luminosity
+            #Get Lbol of star from the two mass documents at the age required
+            Lbol1 = LBOL_mist[index] #Units of solar luminosity
+            Lbol2 = LBOL_mist2[index] #Units of solar luminosity
                             
-                            #Create a list with the two nearest masses and two calculated Lbols for that star
-                            two_masses=[nearest_mass,nearest_mass2]
-                            two_lbol=[Lbol1,Lbol2]
+            #Create a list with the two nearest masses and two calculated Lbols for that star
+            two_masses=[nearest_mass,nearest_mass2]
+            two_lbol=[Lbol1,Lbol2]
                             
-                            #Calculate Lbol by interpolating between mass documents
-                            Lbol = common.interpolation(two_masses,two_lbol,mass)
+            #Calculate Lbol by interpolating between mass documents
+            Lbol = common.interpolation(two_masses,two_lbol,mass)
         
-                            #If Rossby number is smaller than the saturated Rossby number then we use the saturated Lx/Lbol value to calculate Lx              
-                            if Ro < Ro_sat:
+            #If Rossby number is smaller than the saturated Rossby number then we use the saturated Lx/Lbol value to calculate Lx              
+            if Ro < Ro_sat:
                                 
-                                Lx_Lbol = Lx_Lbol_sat
+                Lx_Lbol = Lx_Lbol_sat
                                 
-                                Lx = Lbol*Lx_Lbol # units of solar luminosity [L_\odot]
+                Lx = Lbol*Lx_Lbol # units of solar luminosity [L_\odot]
                             
-                            #If Ro is bigger than Ro_sat then Lx/Lbol follows the relationship from Wright et al. 2011
-                            else:
+            #If Ro is bigger than Ro_sat then Lx/Lbol follows the relationship from Wright et al. 2011
+            else:
         
-                                Lx_Lbol = C*(Ro**beta)
+                Lx_Lbol = C*(Ro**beta)
                                 
-                                Lx = Lbol*Lx_Lbol # units of solar luminosity [L_\odot]
+                Lx = Lbol*Lx_Lbol # units of solar luminosity [L_\odot]
                                                                                     
                             
-                        LX.append(Lx)
-                        # PROT.append(Prot)
-                        # LXLBOL.append(Lx_Lbol)
-                        # RO.append(Ro)
-                        # TAU.append(tau)
+            LX.append(Lx)
                         
-                        if Lx_Lbol > Lx_Lbol_sat:
-                            print('yes')
+        if Lx_Lbol > Lx_Lbol_sat:
+            print('yes')
                         
 
-                    #dictionary = {'Lx': LX} 
-                    #dataframe = pd.DataFrame(dictionary)
-                    #prot_data['Lx'] = dataframe
-                    #prot_data.to_csv(found, index=False)
-                    print(LX)
+    #dictionary = {'Lx': LX} 
+    #dataframe = pd.DataFrame(dictionary)
+    #prot_data['Lx'] = dataframe
+    #prot_data.to_csv(GUMS_file_path, index=False)
+    print(LX)
                                     
-                    a+=1
